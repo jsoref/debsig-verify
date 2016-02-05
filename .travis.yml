@@ -1,0 +1,28 @@
+language: c
+compiler:
+  - gcc
+sudo: required
+dist: trusty
+env:
+  global:
+    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+    # via the "travis encrypt" command using the project repo's public key.
+    - secure: "WvcrQ11lPioPZnUg2YUdoJV4gVaDsKUOBve8F4IVexEvD/YeuSg6sUw3CsU9DQwfSlI9BuD5y8kt0DaKrFU6x1kmRj1IJA8cT3bQOTyTIcfIYp3wCUpA7TSKGD/6DWWRRuPqOgCk39XqIohIdDdfgYXwhWoenvOmWZ0eh5CmaWg="
+    - CFLAGS="-fPIE"
+    - LDFLAGS="-fPIE -pie"
+addons:
+  coverity_scan:
+    project:
+      name: guillemj/debsig-verify
+      description: Debian package signature verification tool
+    notification_email: guillem@debian.org
+    build_command_prepend: ./autogen && ./configure
+    build_command: make
+    branch_pattern: coverity_scan
+before_install:
+  - echo "deb http://archive.ubuntu.com/ubuntu yakkety main" | sudo tee -a /etc/apt/sources.list
+  - sudo apt-get update -qq
+install:
+  - sudo apt-get install -y gnupg pkg-config libxmltok1-dev libdpkg-dev/yakkety
+script:
+  - if [ ${COVERITY_SCAN_BRANCH} != 1 ]; then ./autogen && ./configure && make check; fi
